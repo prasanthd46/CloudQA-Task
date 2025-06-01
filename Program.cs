@@ -5,7 +5,13 @@ using OpenQA.Selenium.Chrome;
 class Program
 {
 
-    static void TestNameField(string[] names, IWebElement nameField)
+    enum FieldType
+    {
+        Number,
+        Text
+    }
+
+    static void TestField(string[] names, IWebElement nameField, FieldType fieldType = FieldType.Text)
     {
         foreach (string name in names)
         {
@@ -19,7 +25,14 @@ class Program
                     throw new Exception("Field value is null after sending keys");
                 }
                 string actualValue = nameField.GetAttribute("value");
-                IsValidName(name);
+                if (fieldType == FieldType.Text)
+                {
+                    IsValidName(name);
+                }
+                else if (fieldType == FieldType.Number)
+                {
+                    isValidNum(name);
+                }
             }
             catch (Exception ex)
             {
@@ -35,34 +48,7 @@ class Program
             }
         }
     }
-    static void TestNumField(string[] nums, IWebElement numField)
-    {
-        foreach (string num in nums) {
-            bool isValid = true;
-            try
-            {
-                numField.Clear();
-                numField.SendKeys(num);
-                if (numField.GetAttribute("value") == null)
-                {
-                    throw new Exception("Field value is null after sending keys");
-                }
-                isValidNum(num);
-            }
-            catch (Exception ex)
-            {
-                isValid = false;
-                Console.WriteLine($"Test case failed for value '{num}': failure cause {ex.Message}");
-            }
-            finally
-            {
-                if (isValid)
-                {
-                    Console.WriteLine($"Test case passed for value :'{num}'");
-                }
-            }
-        }
-    }
+
     private static void isValidNum(string num) {
 
         if (string.IsNullOrWhiteSpace(num))
@@ -99,9 +85,9 @@ class Program
         IWebElement firstName = driver.FindElement(By.XPath("//*[@id='fname']"));
         IWebElement lastName = driver.FindElement(By.XPath("//*[@id='lname']"));
         IWebElement mobile = driver.FindElement(By.XPath("//*[@id='mobile']"));
-        TestNameField(["John123", "JaneDoe", "Alice123", "Bob Smith", "Charlie*", "Diana", "Eve", "Franklin", "Grace", "Hannah Bavi"], firstName);
-        TestNameField(["Doe", "Smith", "Johnson", "Brown", "Williams", "Jones", "Garcia", "Martinez", "Davis", "Rodriguez"], lastName);
-        TestNumField(["1234567890", "0987654321", "123456789", "12345678901", "12345 67890", "123456789a", "12345678b0", "1234567890!"], mobile);
+        TestField(["John123", "JaneDoe", "Alice123", "Bob Smith", "Charlie*", "Diana", "Eve", "Franklin", "Grace", "Hannah Bavi"], firstName);
+        TestField(["Doe", "Smith", "Johnson", "Brown", "Williams", "Jones", "Garcia", "Martinez", "Davis", "Rodriguez"], lastName);
+        TestField(["1234567890", "0987654321", "123456789", "12345678901", "12345 67890", "123456789a", "12345678b0", "1234567890!"], mobile, FieldType.Number);
         Console.WriteLine("\n\n All tests completed.");
         driver.Quit();
     }
